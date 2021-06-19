@@ -1,2 +1,2 @@
 # Learn-OpenGL-With-Tutorials
-Translate and get tutorials in LearnOpenGL.com
+All contents in this repository is on [LearnOpenGL.com](https://learnopengl.com/).
