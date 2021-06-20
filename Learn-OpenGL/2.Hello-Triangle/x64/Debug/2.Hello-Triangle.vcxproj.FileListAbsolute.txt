@@ -1,0 +1,1 @@
+C:\Git\Learn-OpenGL-With-Tutorials\Learn-OpenGL\2.Hello-Triangle\x64\Debug\2.Hello-Triangle.vcxproj.CopyComplete
