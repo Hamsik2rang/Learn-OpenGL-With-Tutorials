@@ -1,0 +1,1 @@
+C:\Git\Learn-OpenGL-With-Tutorials\Learn-OpenGL\3.Shaders\x64\Debug\3.Shaders.vcxproj.CopyComplete
