@@ -15,8 +15,6 @@ constexpr unsigned int screenHeight = 600;
 
 void framebufferSizeCallback(GLFWwindow*, int, int);
 void processInput(GLFWwindow*);
-void checkShaderCompile(unsigned int);
-std::string getShader(bool) throw(...);
 
 int main()
 {
