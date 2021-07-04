@@ -24,6 +24,7 @@
     <ProjectGuid>{57042d10-32c6-4030-b2c6-d0be0e4e4ec1}</ProjectGuid>
     <RootNamespace>My2HelloTriangle</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>1.2.Hello-Triangle</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

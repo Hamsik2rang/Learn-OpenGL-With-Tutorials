@@ -1,4 +1,0 @@
-﻿  Main.cpp
-C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\minwindef.h(130,1): warning C4005: 'APIENTRY': macro redefinition
-C:\Git\vcpkg\installed\x64-windows\include\glad\glad.h(32): message : see previous definition of 'APIENTRY'
-  1.Creating a window.vcxproj -> C:\Git\Learn-OpenGL-With-Tutorials\Learn-OpenGL\x64\Debug\1.Creating a window.exe

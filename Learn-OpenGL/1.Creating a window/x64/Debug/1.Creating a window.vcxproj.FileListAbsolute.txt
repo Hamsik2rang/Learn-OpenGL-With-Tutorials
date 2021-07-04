@@ -1,1 +1,0 @@
-C:\Git\Learn-OpenGL-With-Tutorials\Learn-OpenGL\1.Creating a window\x64\Debug\1.Creating a window.vcxproj.CopyComplete
