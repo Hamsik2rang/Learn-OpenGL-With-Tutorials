@@ -40,6 +40,9 @@
     <Image Include="container.jpg">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="awesomeface.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="VShader.vert">
