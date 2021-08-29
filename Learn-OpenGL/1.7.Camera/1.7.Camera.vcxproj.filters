@@ -27,6 +27,12 @@
     <Image Include="container.jpg">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="bapface.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bapwithmouse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="FShader.frag">
@@ -48,7 +54,10 @@
     <ClInclude Include="stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Shader.h">
+    <ClInclude Include="Shader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

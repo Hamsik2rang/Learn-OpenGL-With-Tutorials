@@ -1,4 +1,5 @@
-#include "Shader.h"
+#include "Shader.hpp"
+#include "Camera.hpp"
 #include <GLFW/glfw3.h>
 
 #include "glm/glm.hpp"
@@ -14,12 +15,14 @@ constexpr unsigned int screenWidth = 800;
 constexpr unsigned int screenHeight = 600;
 
 void framebufferSizeCallback(GLFWwindow*, int, int);
+void cursurPosCallback(GLFWwindow*, double, double);
+void scrollCallback(GLFWwindow*, double, double);
 void processInput(GLFWwindow*);
 
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraForward = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-glm::vec3 cameraRight = glm::cross(cameraForward, cameraUp);
+Camera myCamera(glm::vec3(0.0f, 0.0f, 3.0f));
+
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
 
 int main()
 {
@@ -39,6 +42,9 @@ int main()
 
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPosCallback(window, cursurPosCallback);
+	glfwSetScrollCallback(window, scrollCallback);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -109,10 +115,6 @@ int main()
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
-
-
-	
-
 	unsigned int texture1, texture2;
 	glGenTextures(1, &texture1);
 	glBindTexture(GL_TEXTURE_2D, texture1);
@@ -139,7 +141,7 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
+	data = stbi_load("bapwithmouse.png", &width, &height, &nrChannels, 0);
 	if (data)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -168,17 +170,16 @@ int main()
 	glBindVertexArray(0);
 
 	myShader.use();
-	myShader.setValue("ourTexture0", 0);	// Set Menually. it's not necessary.
+	myShader.setValue("ourTexture1", 0);	// Set menually. it's not necessary.
 	myShader.setValue("ourTexture2", 1);
-
-	glm::mat4 proj = glm::mat4(1.0f);
-	proj = glm::perspective(glm::radians(45.0f), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
-	myShader.setValue("projection", proj);
 
 	// Render loop
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
+		float currentFrame = (float)glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -189,10 +190,11 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, texture2);
 		glBindVertexArray(VAO);
 
-		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraForward, cameraUp);
-		myShader.setValue("view", view);
+		glm::mat4 proj = glm::perspective(glm::radians(myCamera.fov()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
+		myShader.setValue("projection", proj);
 
-		unsigned int projLoc = glGetUniformLocation(myShader.getID(), "projection");
+		glm::mat4 view = glm::lookAt(myCamera.position(), myCamera.position()+ myCamera.forward(), myCamera.up());
+		myShader.setValue("view", view);
 
 		for (auto i = 0; i < 10; i++)
 		{
@@ -224,9 +226,6 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 
 void processInput(GLFWwindow* window)
 {
-	// can adjust accordingly.
-	const float cameraSpeed = 0.05f;	
-	
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		glfwSetWindowShouldClose(window, true);
@@ -234,19 +233,42 @@ void processInput(GLFWwindow* window)
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
-		cameraPos += cameraSpeed * cameraForward;
+		myCamera.processKeyboard(CameraMovement::FORWARD, deltaTime);
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
-		cameraPos -= cameraSpeed * cameraForward;
+		myCamera.processKeyboard(CameraMovement::BACKWARD, deltaTime);
 	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
-		cameraPos -= cameraSpeed * cameraRight;
+		myCamera.processKeyboard(CameraMovement::LEFT, deltaTime);
 	}
 	if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
-		cameraPos += cameraSpeed * cameraRight;
+		myCamera.processKeyboard(CameraMovement::RIGHT, deltaTime);
 	}
-	
+}
+
+void cursurPosCallback(GLFWwindow* window, double xpos, double ypos)
+{
+	static float lastX = 0.0f, lastY = 0.0f;
+	static bool isFirstMove = true;
+	if (isFirstMove)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		isFirstMove = false;
+	}
+
+	float xoffset = static_cast<float>(xpos) - lastX;
+	float yoffset = static_cast<float>(ypos) - lastY;
+	lastX = xpos;
+	lastY = ypos;
+
+	myCamera.processMouseMovement(xoffset, yoffset);
+}
+
+void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	myCamera.processMouseScroll((float)yoffset);
 }
