@@ -112,7 +112,15 @@ int main()
 		glm::vec3(1.3f, -2.0f, -2.5f),
 		glm::vec3(1.5f,  2.0f, -2.5f),
 		glm::vec3(1.5f,  0.2f, -1.5f),
-		glm::vec3(-1.3f,  1.0f, -1.5f)
+		glm::vec3(-1.3f,  1.0f, -1.5f),
+		glm::vec3(-5.3f,  2.0f, -2.5f),
+		glm::vec3(6.8f, -4.0f, -12.3f),
+		glm::vec3(2.3f, -1.8f, -5.9f),
+		glm::vec3(-0.7f,  3.2f, -4.5f),
+		glm::vec3(0.3f, -6.1f, -2.6f),
+		glm::vec3(4.5f,  4.1f, -2.0f),
+		glm::vec3(1.1f,  3.2f, -7.5f),
+		glm::vec3(4.3f,  2.2f, -1.5f),
 	};
 
 	unsigned int texture1, texture2;
@@ -193,10 +201,10 @@ int main()
 		glm::mat4 proj = glm::perspective(glm::radians(myCamera.fov()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 		myShader.setValue("projection", proj);
 
-		glm::mat4 view = glm::lookAt(myCamera.position(), myCamera.position()+ myCamera.forward(), myCamera.up());
+		glm::mat4 view = glm::lookAt(myCamera.position(), myCamera.position() + myCamera.forward(), myCamera.up());
 		myShader.setValue("view", view);
 
-		for (auto i = 0; i < 10; i++)
+		for (auto i = 0; i < 18; i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, cubePosition[i]);

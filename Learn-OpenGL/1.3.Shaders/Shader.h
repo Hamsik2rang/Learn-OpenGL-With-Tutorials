@@ -10,7 +10,7 @@
 class Shader
 {
 private:
-	unsigned int id;
+	unsigned int _id;
 
 public:
 
@@ -54,21 +54,21 @@ public:
 		glCompileShader(fragment);
 		checkStatus(fragment, GL_COMPILE_STATUS);
 
-		id = glCreateProgram();
-		glAttachShader(id, vertex);
-		glAttachShader(id, fragment);
-		glLinkProgram(id);
-		checkStatus(id, GL_LINK_STATUS);
+		_id = glCreateProgram();
+		glAttachShader(_id, vertex);
+		glAttachShader(_id, fragment);
+		glLinkProgram(_id);
+		checkStatus(_id, GL_LINK_STATUS);
 
 		glDeleteShader(vertex);
 		glDeleteShader(fragment);		
 	}
 	void checkStatus(unsigned int program, unsigned int statusCode);
 
-	void use() { glUseProgram(id); }
-	void setValue(const std::string& name, bool value) const { glUniform1i(glGetUniformLocation(id, name.c_str()), (int)value); }
-	void setValue(const std::string& name, int value) const { glUniform1i(glGetUniformLocation(id, name.c_str()), value); }
-	void setValue(const std::string& name, float value) const { glUniform1f(glGetUniformLocation(id, name.c_str()), value); }
+	void use() { glUseProgram(_id); }
+	void setValue(const std::string& name, bool value) const { glUniform1i(glGetUniformLocation(_id, name.c_str()), (int)value); }
+	void setValue(const std::string& name, int value) const { glUniform1i(glGetUniformLocation(_id, name.c_str()), value); }
+	void setValue(const std::string& name, float value) const { glUniform1f(glGetUniformLocation(_id, name.c_str()), value); }
 };
 
 void Shader::checkStatus(unsigned int program, unsigned int statusCode)

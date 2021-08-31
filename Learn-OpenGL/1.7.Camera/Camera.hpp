@@ -13,11 +13,11 @@ enum class CameraMovement
 	RIGHT,
 };
 
-const float YAW			= -90.0f;
-const float PITCH		= 0.0f;
-const float SPEED		= 2.5f;
-const float SENSITIVITY = 0.1f;
-const float FOV			= 45.0f;
+constexpr float YAW			= -90.0f;
+constexpr float PITCH		= 0.0f;
+constexpr float SPEED		= 2.5f;
+constexpr float SENSITIVITY = 0.1f;
+constexpr float FOV			= 45.0f;
 
 class Camera
 {

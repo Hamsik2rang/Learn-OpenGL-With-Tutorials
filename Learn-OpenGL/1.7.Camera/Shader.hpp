@@ -13,7 +13,7 @@
 class Shader
 {
 private:
-	unsigned int id;
+	unsigned int _id;
 
 public:
 	Shader(const char* vpath, const char* fpath)
@@ -56,27 +56,27 @@ public:
 		glCompileShader(fragment);
 		checkStatus(fragment, GL_COMPILE_STATUS);
 
-		id = glCreateProgram();
-		glAttachShader(id, vertex);
-		glAttachShader(id, fragment);
-		glLinkProgram(id);
-		checkStatus(id, GL_LINK_STATUS);
+		_id = glCreateProgram();
+		glAttachShader(_id, vertex);
+		glAttachShader(_id, fragment);
+		glLinkProgram(_id);
+		checkStatus(_id, GL_LINK_STATUS);
 
 		glDeleteShader(vertex);
 		glDeleteShader(fragment);		
 	}
 	void checkStatus(unsigned int program, unsigned int statusCode);
 
-	void use() { glUseProgram(id); }
-	void setValue(const std::string& name, bool value) const { glUniform1i(glGetUniformLocation(id, name.c_str()), (int)value); }
-	void setValue(const std::string& name, int value) const { glUniform1i(glGetUniformLocation(id, name.c_str()), value); }
-	void setValue(const std::string& name, float value) const { glUniform1f(glGetUniformLocation(id, name.c_str()), value); }
+	void use() { glUseProgram(_id); }
+	void setValue(const std::string& name, bool value) const { glUniform1i(glGetUniformLocation(_id, name.c_str()), (int)value); }
+	void setValue(const std::string& name, int value) const { glUniform1i(glGetUniformLocation(_id, name.c_str()), value); }
+	void setValue(const std::string& name, float value) const { glUniform1f(glGetUniformLocation(_id, name.c_str()), value); }
 	
-	void setValue(const std::string& name, glm::mat2 matrix) const { glUniformMatrix2fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix)); }
-	void setValue(const std::string& name, glm::mat3 matrix) const { glUniformMatrix3fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix)); }
-	void setValue(const std::string& name, glm::mat4 matrix) const { glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix)); }
+	void setValue(const std::string& name, glm::mat2 matrix) const { glUniformMatrix2fv(glGetUniformLocation(_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix)); }
+	void setValue(const std::string& name, glm::mat3 matrix) const { glUniformMatrix3fv(glGetUniformLocation(_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix)); }
+	void setValue(const std::string& name, glm::mat4 matrix) const { glUniformMatrix4fv(glGetUniformLocation(_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix)); }
 
-	unsigned int getID() const { return id; }
+	unsigned int getID() const { return _id; }
 };
 
 void Shader::checkStatus(unsigned int program, unsigned int statusCode)
