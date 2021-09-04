@@ -11,8 +11,8 @@
 
 #include "stb_image.h"
 
-constexpr unsigned int screenWidth = 800;
-constexpr unsigned int screenHeight = 600;
+constexpr unsigned int screenWidth = 1280;
+constexpr unsigned int screenHeight = 720;
 
 void framebufferSizeCallback(GLFWwindow*, int, int);
 void cursurPosCallback(GLFWwindow*, double, double);
@@ -129,7 +129,7 @@ int main()
 	glEnableVertexAttribArray(0);
 
 	glm::vec3 cubePos = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 lightPos = glm::vec3(1.2f, 1.0f, 2.0f);
+	glm::vec3 lightPos = glm::vec3(3.0f, 0.0f, 0.0f);
 
 
 	// Render loop
@@ -142,6 +142,9 @@ int main()
 
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		float angle = 60.0f;
+		lightPos = glm::vec3(3 * cos(glm::radians(angle * (float)glfwGetTime())), lightPos.y, 3 * sin(glm::radians(angle) * (float)glfwGetTime()));
 	
 		cubeShader.use();
 		cubeShader.setValue("lightColor", 1.0f, 1.0f, 1.0f);
@@ -152,9 +155,10 @@ int main()
 		glm::mat4 proj = glm::perspective(glm::radians(myCamera.fov()), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 		glm::mat4 view = glm::lookAt(myCamera.position(), myCamera.position() + myCamera.forward(), myCamera.up());
 		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, 2.0f * (float)glfwGetTime(), glm::vec3(0.5f, 0.2f, 0.3f));
 		model = glm::translate(model, cubePos);
 
-		cubeShader.use();
+
 		cubeShader.setValue("projection", proj);
 		cubeShader.setValue("view", view);
 		cubeShader.setValue("model", model);
