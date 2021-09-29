@@ -154,6 +154,11 @@
     <None Include="fragment.frag" />
     <None Include="vertex.vert" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="2k_mercury.jpg" />
+    <Image Include="8k_earth_nightmap.jpg" />
+    <Image Include="container2.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

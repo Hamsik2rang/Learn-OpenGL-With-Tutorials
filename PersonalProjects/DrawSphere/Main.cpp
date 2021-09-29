@@ -17,6 +17,9 @@
 #include <cassert>
 #include <vector>
 
+#define DEBUG false
+#define COL_STRIDE 5
+#define ROW_STRIDE 3
 
 struct Geometry
 {
@@ -24,7 +27,7 @@ struct Geometry
 	unsigned int capacity;
 	unsigned int size;
 
-	Geometry() : capacity(72), size(0)
+	Geometry() : capacity(120), size(0)
 	{
 		buffer = new float[capacity];
 	}
@@ -45,6 +48,16 @@ struct Geometry
 		buffer[size++] = v.z;
 	}
 
+	void add(float* t)
+	{
+		if (size + 2 >= capacity)
+		{
+			resize();
+		}
+		buffer[size++] = *(t + 0);
+		buffer[size++] = *(t + 1);
+	}
+
 	void resize()
 	{
 		capacity *= 4;
@@ -60,13 +73,11 @@ void cursorPosCallback(GLFWwindow*, double, double);
 void scrollCallback(GLFWwindow*, double, double);
 void processInput(GLFWwindow*);
 
-void GeometryShader(float**, int&, unsigned int, unsigned int);
-void partition(glm::vec3, glm::vec3, glm::vec3, Geometry&, int);
+void partition(glm::vec3, glm::vec3, glm::vec3, float*, float*, float*, Geometry&, int);
 glm::vec3 getNormalPos(glm::vec3, glm::vec3, float);
-//unsigned int loadTexture(const char*);
+unsigned int loadTexture(const char*);
 
 Hsrang::Camera camera(0.0f, 0.0f, 3.0f);
-
 
 int main()
 {
@@ -89,44 +100,45 @@ int main()
 
 	assert(gladLoadGLLoader((GLADloadproc)glfwGetProcAddress));
 
-	//glEnable(GL_DEPTH_TEST);
-
+	glEnable(GL_DEPTH_TEST);
+	auto textureID = loadTexture("./2k_sun.jpg");
 	Shader shader("./vertex.vert", "./fragment.frag");
 
-	float* vertices = new float[72]{
-		0.0f, 0.5f, 0.0f,
-		0.0f, 0.0f, 0.5f,
-		0.5f, 0.0f, 0.0f,
+	float* vertices = new float[120]{
+		// position			// texture
+		0.0f, 0.5f, 0.0f,	0.125f, 1.0f,
+		0.0f, 0.0f, 0.5f,	0.0f,	0.5f,
+		0.5f, 0.0f, 0.0f,	0.25f,	0.5f,
 
-		0.0f, 0.5f, 0.0f,
-		0.5f, 0.0f, 0.0f,
-		0.0f, 0.0f,-0.5f,
+		0.0f, 0.5f, 0.0f,	0.375f, 1.0f,
+		0.5f, 0.0f, 0.0f,	0.25f,	0.5f,
+		0.0f, 0.0f,-0.5f,	0.5f,	0.5f,
 
-		0.0f, 0.5f, 0.0f,
-		0.0f, 0.0f, -0.5f,
-		-0.5f, 0.0f, 0.0f,
+		0.0f, 0.5f, 0.0f,	0.625f, 1.0f,
+		0.0f, 0.0f, -0.5f,	0.5f,	0.5f,
+		-0.5f, 0.0f, 0.0f,	0.75f,	0.5f,
 
-		0.0f, 0.5f, 0.0f,
-		-0.5f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.5f,
+		0.0f, 0.5f, 0.0f,	0.875f, 1.0f,
+		-0.5f, 0.0f, 0.0f,	0.75f,	0.5f,
+		0.0f, 0.0f, 0.5f,	1.0f,	0.5f,
 
-		0.0f, -0.5f, 0.0f,
-		0.0f, 0.0f, 0.5f,
-		0.5f, 0.0f, 0.0f,
+		0.0f, -0.5f, 0.0f,	0.125f, 0.0f,
+		0.0f, 0.0f, 0.5f,	0.0f,	0.5f,
+		0.5f, 0.0f, 0.0f,	0.25f,	0.5f,
 
-		0.0f, -0.5f, 0.0f,
-		0.5f, 0.0f, 0.0f,
-		0.0f, 0.0f,-0.5f,
+		0.0f, -0.5f, 0.0f,	0.375f, 0.0f,
+		0.5f, 0.0f, 0.0f,	0.25f,	0.5f,
+		0.0f, 0.0f,-0.5f,	0.5f,	0.5f,
 
-		0.0f, -0.5f, 0.0f,
-		0.0f, 0.0f, -0.5f,
-		-0.5f, 0.0f, 0.0f,
+		0.0f, -0.5f, 0.0f,	0.625f, 0.0f,
+		0.0f, 0.0f, -0.5f,	0.5f,	0.5f,
+		-0.5f, 0.0f, 0.0f,	0.75f,	0.5f,
 
-		0.0f, -0.5f, 0.0f,
-		-0.5f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.5f,
+		0.0f, -0.5f, 0.0f,	0.875f, 0.0f,
+		-0.5f, 0.0f, 0.0f,	0.75f,	0.5f,
+		0.0f, 0.0f, 0.5f,	1.0f,	0.5f
 	};
-	int size = 72;
+	int size = 120;
 
 	std::vector<glm::vec3> spherePosition{
 		glm::vec3(0.0f,  0.0f,  0.0f),
@@ -140,28 +152,38 @@ int main()
 		glm::vec3(1.5f,  0.2f, -1.5f),
 		glm::vec3(-1.3f,  1.0f, -1.5f),
 	};
+
 	for (int i = 0; i < 690; i++)
 	{
 		spherePosition.push_back(Hsrang::Utility::getRandomPosition());
 	}
 
 	Geometry geoBuffer;
-	glm::vec3 side[3] = { glm::vec3(0.0f, 0.0f, 0.0f) };
 	for (int i = 0; i < size / 9; i++)
 	{
+		glm::vec3 side[3] = { glm::vec3(0.0f, 0.0f, 0.0f) };
+		float texCoord[3][2] = { 0.0f };
 		for (int j = 0; j < 3; j++)
 		{
-			side[j] = glm::vec3((vertices)[(i * 9) + (j * 3) + 0], (vertices)[(i * 9) + (j * 3) + 1], (vertices)[(i * 9) + (j * 3) + 2]);
+			side[j] = glm::vec3((vertices)[(i * ROW_STRIDE * COL_STRIDE) + (j * COL_STRIDE) + 0], (vertices)[(i * ROW_STRIDE * COL_STRIDE) + (j * COL_STRIDE) + 1], (vertices)[(i * ROW_STRIDE * COL_STRIDE) + (j * COL_STRIDE) + 2]);
+
+			texCoord[j][0] = vertices[(i * ROW_STRIDE * COL_STRIDE) + (j * COL_STRIDE) + 3];
+			texCoord[j][1] = vertices[(i * ROW_STRIDE * COL_STRIDE) + (j * COL_STRIDE) + 4];
 		}
-		partition(side[0], side[1], side[2], geoBuffer, 4);
+		partition(side[0], side[1], side[2], texCoord[0], texCoord[1], texCoord[2], geoBuffer, 3);
 	}
 	vertices = geoBuffer.buffer;
 	size = geoBuffer.size;
 
-	//for (int i = 0; i < size / 3; i++)
-	//{
-	//	std::cout << vertices[3 * i] << " " << vertices[3 * i + 1] << " " << vertices[3 * i + 2] << std::endl;
-	//}
+
+#if DEBUG
+	for (int i = 0; i < size / 3; i++)
+	{
+		std::cout << vertices[3 * i] << " " << vertices[3 * i + 1] << " " << vertices[3 * i + 2] << std::endl;
+	}
+#endif
+
+	//assert(size % 5 == 0);
 
 	unsigned int VAO, VBO;
 	glGenBuffers(1, &VBO);
@@ -172,10 +194,16 @@ int main()
 
 	glBindVertexArray(VAO);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(0 * sizeof(float)));
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
 	shader.use();
 
 	while (!glfwWindowShouldClose(window))
@@ -183,14 +211,13 @@ int main()
 		processInput(window);
 
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glBindVertexArray(VAO);
 
 		glm::mat4 view = glm::lookAt(camera.pos(), camera.pos() + camera.forward(), camera.up());
 		glm::mat4 projection = glm::perspective(glm::radians(camera.fov()), Hsrang::Constant::screenWidth / Hsrang::Constant::screenHeight, 0.1f, 100.0f);
-		
+
 		shader.use();
 		shader.setValue("view", view);
 		shader.setValue("projection", projection);
@@ -273,39 +300,49 @@ void scrollCallback(GLFWwindow* window, double dx, double dy)
 	camera.zoom(dy);
 }
 
-//unsigned int loadTexture(const char*);
-
-void GeometryShader(float** vertices, int& size, unsigned int VAO, unsigned int VBO)
+unsigned int loadTexture(const char* path)
 {
-	static float branchTime = 3.0f;
-	static float depth = 0;
-
-	if ((float)glfwGetTime() > branchTime)
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+	int width, height, nrComponents;
+	unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
+	if (data)
 	{
-		branchTime += 3.0f;
-		depth++;
-
-		Geometry geoBuffer;
-		glm::vec3 side[3] = { glm::vec3(0.0f, 0.0f, 0.0f) };
-		for (int i = 0; i < size / 9; i++)
+		GLenum format = 0;
+		if (nrComponents == 1)
 		{
-			for (int j = 0; j < 3; j++)
-			{
-				side[j] = glm::vec3((*vertices)[(i * 9) + (j * 3) + 0], (*vertices)[(i * 9) + (j * 3) + 1], (*vertices)[(i * 9) + (j * 3) + 2]);
-			}
-			partition(side[0], side[1], side[2], geoBuffer, depth);
+			format = GL_RED;
 		}
-		*vertices = geoBuffer.buffer;
-		size = geoBuffer.size;
-		glBindVertexArray(VAO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * size, *vertices, GL_STATIC_DRAW);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0);
+		else if (nrComponents == 3)
+		{
+			format = GL_RGB;
+		}
+		else if (nrComponents == 4)
+		{
+			format = GL_RGBA;
+		}
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		stbi_image_free(data);
 	}
+	else
+	{
+		std::cerr << "Texture failed to load at path: " << path << std::endl;
+		stbi_image_free(data);
+	}
+
+	return textureID;
 }
 
-void partition(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, Geometry& geometryBuffer, int depth)
+void partition(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, float* t1, float* t2, float* t3, Geometry& geometryBuffer, int depth)
 {
 	if (depth > 0)
 	{
@@ -313,17 +350,26 @@ void partition(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, Geometry& geometryBuffe
 		glm::vec3 n2 = (p1 + p3) / 2.0f;
 		glm::vec3 n3 = (p2 + p3) / 2.0f;
 
-		partition(n1, n2, n3, geometryBuffer, depth - 1);
-		partition(p1, n1, n2, geometryBuffer, depth - 1);
-		partition(n1, p2, n3, geometryBuffer, depth - 1);
-		partition(n2, n3, p3, geometryBuffer, depth - 1);
+		float nt1[2] = { (t1[0] + t2[0]) / 2.0f, (t1[1] + t2[1]) / 2.0f };
+		float nt2[2] = { (t1[0] + t3[0]) / 2.0f, (t1[1] + t3[1]) / 2.0f };
+		float nt3[2] = { (t2[0] + t3[0]) / 2.0f, (t2[1] + t3[1]) / 2.0f };
+
+
+		partition(n1, n2, n3, nt1, nt2, nt3, geometryBuffer, depth - 1);
+		partition(p1, n1, n2, t1, nt1, nt2, geometryBuffer, depth - 1);
+		partition(n1, p2, n3, nt1, t2, nt3, geometryBuffer, depth - 1);
+		partition(n2, n3, p3, nt2, nt3, t3, geometryBuffer, depth - 1);
 	}
 	else
 	{
 		glm::vec3 center = glm::vec3(0.0f, 0.0f, 0.0f);
+
 		geometryBuffer.add(getNormalPos(p1, center, 0.8f));
+		geometryBuffer.add(t1);
 		geometryBuffer.add(getNormalPos(p2, center, 0.8f));
+		geometryBuffer.add(t2);
 		geometryBuffer.add(getNormalPos(p3, center, 0.8f));
+		geometryBuffer.add(t3);
 	}
 }
 
