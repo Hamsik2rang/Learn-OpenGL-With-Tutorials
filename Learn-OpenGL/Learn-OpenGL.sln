@@ -27,8 +27,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "2.4.Lighting Maps", "2.4.Li
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "2.5.Lighting Casters", "2.5.Lighting Casters\2.5.Lighting Casters.vcxproj", "{1340C135-513A-44EF-8EEC-15993596AD3A}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "2.6.Multiple Lights", "2.6.Multiple Lights\2.6.Multiple Lights.vcxproj", "{AAD91B46-3C67-4546-9824-9F31DB15C2E0}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -133,14 +131,6 @@ Global
 		{1340C135-513A-44EF-8EEC-15993596AD3A}.Release|x64.Build.0 = Release|x64
 		{1340C135-513A-44EF-8EEC-15993596AD3A}.Release|x86.ActiveCfg = Release|Win32
 		{1340C135-513A-44EF-8EEC-15993596AD3A}.Release|x86.Build.0 = Release|Win32
-		{AAD91B46-3C67-4546-9824-9F31DB15C2E0}.Debug|x64.ActiveCfg = Debug|x64
-		{AAD91B46-3C67-4546-9824-9F31DB15C2E0}.Debug|x64.Build.0 = Debug|x64
-		{AAD91B46-3C67-4546-9824-9F31DB15C2E0}.Debug|x86.ActiveCfg = Debug|Win32
-		{AAD91B46-3C67-4546-9824-9F31DB15C2E0}.Debug|x86.Build.0 = Debug|Win32
-		{AAD91B46-3C67-4546-9824-9F31DB15C2E0}.Release|x64.ActiveCfg = Release|x64
-		{AAD91B46-3C67-4546-9824-9F31DB15C2E0}.Release|x64.Build.0 = Release|x64
-		{AAD91B46-3C67-4546-9824-9F31DB15C2E0}.Release|x86.ActiveCfg = Release|Win32
-		{AAD91B46-3C67-4546-9824-9F31DB15C2E0}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
