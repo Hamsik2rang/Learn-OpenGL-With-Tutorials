@@ -25,6 +25,7 @@ Camera myCamera(glm::vec3(0.0f, 0.0f, 3.0f));
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+glm::vec3 lightPos{ 1.2f, 1.0f, 2.0f };
 
 int main()
 {
@@ -134,6 +135,14 @@ int main()
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
+	unsigned int lightVAO;
+	glGenVertexArrays(1, &lightVAO);
+	glBindVertexArray(lightVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
@@ -144,12 +153,18 @@ int main()
 	cubeShader.use();
 	cubeShader.setValue("material.diffuse", 0);
 	cubeShader.setValue("material.specular", 1);
-	cubeShader.setValue("material.shininess", 64.0f);
+	cubeShader.setValue("material.shininess", 32.0f);
 
-	cubeShader.setValue("light.direction", -0.2f, -1.0f, -0.3f);
+	//cubeShader.setValue("light.direction", -0.2f, -1.0f, -0.3f);
+	cubeShader.setValue("light.position", lightPos);
+	cubeShader.setValue("viewPos", myCamera.position());
 	cubeShader.setValue("light.ambient", 0.2f, 0.2f, 0.2f);
 	cubeShader.setValue("light.diffuse", 0.5f, 0.5f, 0.5f);
 	cubeShader.setValue("light.specular", 1.0f, 1.0f, 1.0f);
+
+	cubeShader.setValue("light.constant", 1.0f);
+	cubeShader.setValue("light.linear", 0.09f);
+	cubeShader.setValue("light.quadratic", 0.032f);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, diffuseMap);
@@ -169,7 +184,6 @@ int main()
 
 		//cube setting
 		cubeShader.use();
-		cubeShader.setValue("viewPos", myCamera.position());
 		glm::mat4 proj = glm::perspective(glm::radians(myCamera.fov()), (float)screenWidth / screenHeight, 0.1f, 100.0f);
 		glm::mat4 view = myCamera.lookAt();
 		cubeShader.setValue("projection", proj);
@@ -179,7 +193,7 @@ int main()
 		{
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, cubePosition[i]);
-			float angle = 20.0f * (i + 1);
+			float angle = 20.0f * i;
 			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 			cubeShader.setValue("model", model);
 
@@ -187,9 +201,21 @@ int main()
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
+		lightShader.use();
+		lightShader.setValue("projection", proj);
+		lightShader.setValue("view", view);
+		auto model = glm::mat4(1.0f);
+		model = glm::translate(model, lightPos);
+		model = glm::scale(model, glm::vec3(0.2f));
+		lightShader.setValue("model", model);
+
+		glBindVertexArray(lightVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+	glDeleteVertexArrays(1, &lightVAO);
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 
